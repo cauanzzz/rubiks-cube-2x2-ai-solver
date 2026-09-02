@@ -1,11 +1,8 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <cstdlib>
-#include <ctime>
+#ifndef CUBO_HPP
+#define CUBO_HPP
 
-#include "raylib.h"
+#include <iostream>
+#include <cstdlib>
 
 // pensando que cada lado vai ser representado por faces[0-5][x][x]
 // 0-TOPO
@@ -15,7 +12,8 @@
 // 4-DIREITA
 // 5-TRASEIRA
 
-enum Face {
+enum Face 
+{
     TOPO = 0,
     BASE = 1,
     ESQUERDA = 2,
@@ -303,21 +301,4 @@ struct cubo
             girar_b(); girar_b(); girar_b();
         }
     };
-
-int main()
-{
-    srand(time(NULL));
-    cubo c;
-    std::cout << "COMEÇO:\n";
-    c.imprimir();
-    bool verify=c.verificador();
-    std::cout << verify;
-
-    std::cout << "POS GIRO:\n";
-    c.girar_f();
-    c.imprimir();
-    verify=c.verificador();
-    std::cout << verify;
-
-    return 0;
-}
+#endif
