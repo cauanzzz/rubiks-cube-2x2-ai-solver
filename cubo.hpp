@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <string>
 
 // pensando que cada lado vai ser representado por faces[0-5][x][x]
 // 0-TOPO
@@ -320,22 +321,49 @@ struct cubo
         }
 
 
-        //heuristica seta um correto com base na posicao [0][0] da face e com base nisso vai fazer a contagem de quantos estão errados, a divisão por 4 ocorre por que o maximo de mudanças possivei em um giro perfeito eh 4
-        int calcular_heuristica() const 
-        {
-            int incorretos = 0;
-            for (int f = 0; f < 6; f++) {
-                int corReferencia = faces[f][0][0];
-                for (int i = 0; i < 2; i++) {
-                    for (int j = 0; j < 2; j++) {
-                        if (faces[f][i][j] != corReferencia) {
-                            incorretos++;
-                        }
+        
+    int calcular_heuristica() const 
+    {
+        if (verificador()) return 0;
+
+        auto estimar = [](const cubo& c) {
+            int total = 0;
+            for (int f = 0; f < 6; ++f) {
+                int frequencia[6] = {};
+                int maior = 0;
+                for (int i = 0; i < 2; ++i) {
+                    for (int j = 0; j < 2; ++j) {
+                        int quantidade = ++frequencia[c.faces[f][i][j]];
+                        if (quantidade > maior) maior = quantidade;
                     }
                 }
+                total += 4 - maior;
             }
-            return incorretos / 4;
+            return (total + 7) / 8;
+        };
+
+        using Giro = void (cubo::*)();
+        const Giro giros[] = 
+        {
+            &cubo::girar_f, &cubo::girar_antihorariof,
+            &cubo::girar_r, &cubo::girar_antihorarior,
+            &cubo::girar_u, &cubo::girar_antihorariou,
+            &cubo::girar_l, &cubo::girar_antihorariol,
+            &cubo::girar_d, &cubo::girar_antihorariod,
+            &cubo::girar_b, &cubo::girar_antihorariob
+        };
+
+        int menor = 24;
+        for (Giro giro : giros) {
+            cubo proximo = *this;
+            (proximo.*giro)();
+
+            int estimativa = estimar(proximo);
+            if (estimativa < menor) menor = estimativa;
         }
+
+        return 1 + menor;
+    }
 
     };
 
