@@ -40,6 +40,20 @@ inline std::vector<Movimento> obter_movimentos()
     };
 }
 
+struct NoA 
+{
+    NoBusca no;
+    int g;
+    int h;
+
+    int f() const { return g + h; }
+
+    bool operator>(const NoA& outro) const 
+    {
+        return f() > outro.f();
+    }
+};
+
 inline ResultadoIA resolver_bfs(cubo inicial) 
 {
     ResultadoIA resultado;
@@ -136,6 +150,59 @@ inline ResultadoIA resolver_profundidade(cubo inicial, int profundidademax= 11)
             }
         }
     }
+    resultado.encontrado = false;
+    return resultado;
+}
+
+inline ResultadoIA resolver_astar(cubo inicial) {
+    ResultadoIA resultado;
+    resultado.estadosVisitados = 0;
+
+    std::priority_queue<NoA, std::vector<NoA>, std::greater<NoA>> minHeap;
+    std::unordered_map<std::string, int> custoG;
+
+    int hInicial = inicial.calcular_heuristica();
+    minHeap.push({{inicial, {}}, 0, hInicial});
+    custoG[inicial.obter_chave()] = 0;
+
+    auto movimentos12 = obter_movimentos();
+
+    while (!minHeap.empty()) {
+        NoA topo = minHeap.top();
+        minHeap.pop();
+
+        resultado.estadosVisitados++;
+
+        if (topo.no.estadoBusca.verificador()) {
+            resultado.passos = topo.no.historicomovimentos;
+            resultado.encontrado = true;
+            return resultado;
+        }
+
+        std::string chaveAtual = topo.no.estadoBusca.obter_chave();
+        if (topo.g > custoG[chaveAtual]) {
+            continue;
+        }
+
+        for (const auto& m : movimentos12) {
+            cubo proximo = topo.no.estadoBusca;
+            (proximo.*(m.funcao))();
+
+            std::string chave = proximo.obter_chave();
+            int novoG = topo.g + 1;
+
+            if (custoG.find(chave) == custoG.end() || novoG < custoG[chave]) {
+                custoG[chave] = novoG;
+
+                std::vector<std::string> novoHistorico = topo.no.historicomovimentos;
+                novoHistorico.push_back(m.nome);
+
+                int novoH = proximo.calcular_heuristica();
+                minHeap.push({{proximo, novoHistorico}, novoG, novoH});
+            }
+        }
+    }
+
     resultado.encontrado = false;
     return resultado;
 }
