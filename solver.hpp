@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <functional>
 #include "cubo.hpp"
 
 struct ResultadoIA 
@@ -167,31 +168,36 @@ inline ResultadoIA resolver_astar(cubo inicial) {
 
     auto movimentos12 = obter_movimentos();
 
-    while (!minHeap.empty()) {
+    while (!minHeap.empty()) 
+    {
         NoA topo = minHeap.top();
         minHeap.pop();
 
+        std::string chaveAtual = topo.no.estadoBusca.obter_chave();
+        if (custoG.find(chaveAtual) != custoG.end() && topo.g > custoG[chaveAtual]) 
+        {
+            continue;
+        }
+
         resultado.estadosVisitados++;
 
-        if (topo.no.estadoBusca.verificador()) {
+        if (topo.no.estadoBusca.verificador()) 
+        {
             resultado.passos = topo.no.historicomovimentos;
             resultado.encontrado = true;
             return resultado;
         }
 
-        std::string chaveAtual = topo.no.estadoBusca.obter_chave();
-        if (topo.g > custoG[chaveAtual]) {
-            continue;
-        }
-
-        for (const auto& m : movimentos12) {
+        for (const auto& m : movimentos12) 
+        {
             cubo proximo = topo.no.estadoBusca;
             (proximo.*(m.funcao))();
 
             std::string chave = proximo.obter_chave();
             int novoG = topo.g + 1;
 
-            if (custoG.find(chave) == custoG.end() || novoG < custoG[chave]) {
+            if (custoG.find(chave) == custoG.end() || novoG < custoG[chave]) 
+            {
                 custoG[chave] = novoG;
 
                 std::vector<std::string> novoHistorico = topo.no.historicomovimentos;
