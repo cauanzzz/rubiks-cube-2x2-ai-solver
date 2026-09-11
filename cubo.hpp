@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include <cstdlib>
-#include <string>
 
 // pensando que cada lado vai ser representado por faces[0-5][x][x]
 // 0-TOPO
@@ -242,9 +241,19 @@ struct cubo
             faces[ESQUERDA][0][0] = tempT1;
         }
 
+        void girar_duplof()
+        {
+            girar_f(); girar_f();
+        }
+
         void girar_antihorariof()
         {
             girar_f(); girar_f(); girar_f();
+        }
+
+        void girar_duplor()
+        {
+            girar_r(); girar_r();
         }
 
         void girar_antihorarior()
@@ -252,9 +261,19 @@ struct cubo
             girar_r(); girar_r(); girar_r();
         }
 
+        void girar_duplou()
+        {
+            girar_u(); girar_u();
+        }
+
         void girar_antihorariou()
         {
             girar_u(); girar_u(); girar_u();
+        }
+
+        void girar_duplol()
+        {
+            girar_l(); girar_l();
         }
 
         void girar_antihorariol()
@@ -262,9 +281,19 @@ struct cubo
             girar_l(); girar_l(); girar_l();
         }
 
+        void girar_duplod()
+        {
+            girar_d(); girar_d();
+        }
+
         void girar_antihorariod()
         {
             girar_d(); girar_d(); girar_d();
+        }
+
+        void girar_duplob()
+        {
+            girar_b(); girar_b();
         }
 
         void girar_antihorariob()
@@ -272,16 +301,42 @@ struct cubo
             girar_b(); girar_b(); girar_b();
         }
 
-        std::string obter_chave() const {
+        std::string obter_chave() const 
+        {
             std::string chave = "";
-            for (int i = 0; i < 6; i++) {
-                for (int j = 0; j < 2; j++) {
-                    for (int k = 0; k < 2; k++) {
-                        chave += std::to_string(faces[i][j][k]);
+            chave.reserve(24); 
+
+            for (int f = 0; f < 6; f++) 
+            {
+                for (int i = 0; i < 2; i++) 
+                {
+                    for (int j = 0; j < 2; j++) 
+                    {                        
+                        chave += ('0' + faces[f][i][j]);
                     }
                 }
             }
             return chave;
         }
+
+
+        //heuristica seta um correto com base na posicao [0][0] da face e com base nisso vai fazer a contagem de quantos estão errados, a divisão por 4 ocorre por que o maximo de mudanças possivei em um giro perfeito eh 4
+        int calcular_heuristica() const 
+        {
+            int incorretos = 0;
+            for (int f = 0; f < 6; f++) {
+                int corReferencia = faces[f][0][0];
+                for (int i = 0; i < 2; i++) {
+                    for (int j = 0; j < 2; j++) {
+                        if (faces[f][i][j] != corReferencia) {
+                            incorretos++;
+                        }
+                    }
+                }
+            }
+            return incorretos / 4;
+        }
+
     };
+
 #endif
