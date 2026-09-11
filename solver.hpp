@@ -86,5 +86,59 @@ inline ResultadoIA resolver_bfs(cubo inicial)
     return resultado;
 }
 
+inline ResultadoIA resolver_profundidade(cubo inicial, int profundidademax= 11)
+{
+    ResultadoIA resultado;
+    resultado.estadosVisitados=0;
+
+    auto movimentos12=obter_movimentos();
+
+    for(int limite=0; limite<=profundidademax; limite++)
+    {
+        std::stack <NoBusca> pilha;
+        std::unordered_map <std::string, int> visitadosProfundidade;
+
+        pilha.push({inicial, {}});
+        visitadosProfundidade[inicial.obter_chave()]=0;
+
+        while (!pilha.empty())
+        {
+            NoBusca atual=pilha.top();
+            pilha.pop();
+
+            resultado.estadosVisitados++;
+
+            if(atual.estadoBusca.verificador()==true)
+            {
+                resultado.passos=atual.historicomovimentos;
+                resultado.encontrado=true;
+                return resultado;
+            }
+
+            if((int)atual.historicomovimentos.size()<limite)
+            {
+                for(const auto& m: movimentos12)
+                {
+                    cubo proximo=atual.estadoBusca;
+                    (proximo.*(m.funcao))();
+
+                    std::string chave = proximo.obter_chave();
+                    int novaProfundidade = (int)atual.historicomovimentos.size()+1;
+
+                    if (visitadosProfundidade.find(chave)==visitadosProfundidade.end() || novaProfundidade<visitadosProfundidade[chave])
+                    {
+                        visitadosProfundidade[chave]=novaProfundidade;
+                        std::vector<std::string> novoHistorico = atual.historicomovimentos;
+                        novoHistorico.push_back(m.nome);
+                        pilha.push({proximo,novoHistorico});
+                    }
+                }
+            }
+        }
+    }
+    resultado.encontrado = false;
+    return resultado;
+}
+
 
 #endif
