@@ -1,11 +1,9 @@
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <cstdlib>
-#include <ctime>
+#ifndef CUBO_HPP
+#define CUBO_HPP
 
-#include "raylib.h"
+#include <iostream>
+#include <cstdlib>
+#include <string>
 
 // pensando que cada lado vai ser representado por faces[0-5][x][x]
 // 0-TOPO
@@ -15,7 +13,8 @@
 // 4-DIREITA
 // 5-TRASEIRA
 
-enum Face {
+enum Face 
+{
     TOPO = 0,
     BASE = 1,
     ESQUERDA = 2,
@@ -302,22 +301,70 @@ struct cubo
         {
             girar_b(); girar_b(); girar_b();
         }
+
+        std::string obter_chave() const 
+        {
+            std::string chave = "";
+            chave.reserve(24); 
+
+            for (int f = 0; f < 6; f++) 
+            {
+                for (int i = 0; i < 2; i++) 
+                {
+                    for (int j = 0; j < 2; j++) 
+                    {                        
+                        chave += ('0' + faces[f][i][j]);
+                    }
+                }
+            }
+            return chave;
+        }
+
+
+        
+    int calcular_heuristica() const 
+    {
+        if (verificador()) return 0;
+
+        auto estimar = [](const cubo& c) {
+            int total = 0;
+            for (int f = 0; f < 6; ++f) {
+                int frequencia[6] = {};
+                int maior = 0;
+                for (int i = 0; i < 2; ++i) {
+                    for (int j = 0; j < 2; ++j) {
+                        int quantidade = ++frequencia[c.faces[f][i][j]];
+                        if (quantidade > maior) maior = quantidade;
+                    }
+                }
+                total += 4 - maior;
+            }
+            return (total + 7) / 8;
+        };
+
+        using Giro = void (cubo::*)();
+        const Giro giros[] = 
+        {
+            &cubo::girar_f, &cubo::girar_antihorariof,
+            &cubo::girar_r, &cubo::girar_antihorarior,
+            &cubo::girar_u, &cubo::girar_antihorariou,
+            &cubo::girar_l, &cubo::girar_antihorariol,
+            &cubo::girar_d, &cubo::girar_antihorariod,
+            &cubo::girar_b, &cubo::girar_antihorariob
+        };
+
+        int menor = 24;
+        for (Giro giro : giros) {
+            cubo proximo = *this;
+            (proximo.*giro)();
+
+            int estimativa = estimar(proximo);
+            if (estimativa < menor) menor = estimativa;
+        }
+
+        return 1 + menor;
+    }
+
     };
 
-int main()
-{
-    srand(time(NULL));
-    cubo c;
-    std::cout << "COMEÇO:\n";
-    c.imprimir();
-    bool verify=c.verificador();
-    std::cout << verify;
-
-    std::cout << "POS GIRO:\n";
-    c.girar_f();
-    c.imprimir();
-    verify=c.verificador();
-    std::cout << verify;
-
-    return 0;
-}
+#endif
